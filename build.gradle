@@ -1,0 +1,44 @@
+apply plugin: 'java'
+apply plugin: 'groovy'
+
+sourceCompatibility = 1.6
+targetCompatibility = 1.6
+
+configurations {
+    cucumberRuntime {
+        extendsFrom testRuntime
+    }
+}
+
+task cucumber() {
+    dependsOn assemble, compileTestJava
+    doLast {
+        javaexec {
+            main = "cucumber.api.cli.Main"
+            classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
+            args = ['--plugin', 'pretty', '--glue', 'src/test/groovy/steps', 'src/test/resources']
+
+        }
+    }
+}
+
+project.ext {
+    cucumberVersion = '4.0.0'
+}
+build.dependsOn cucumber
+
+dependencies {
+    compile 'org.codehaus.groovy:groovy-all:2.4.3'
+    cucumberRuntime files("${jar.archivePath}")
+    testCompile 'io.cucumber:cucumber-groovy:' + cucumberVersion
+    testCompile 'io.cucumber:cucumber-java:' + cucumberVersion
+    testCompile 'io.cucumber:cucumber-junit:' + cucumberVersion
+    testCompile 'junit:junit:4.12'
+}
+
+repositories {
+    mavenCentral()
+}
+
+
+
